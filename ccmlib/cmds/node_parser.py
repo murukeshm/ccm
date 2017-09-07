@@ -1,49 +1,46 @@
-from ccmlib.cmds.command import ThrowingParser
-
-node_parser = ThrowingParser()
-node_parser.add_argument('node_name', type=str, nargs=1, help='node name')
-node_subparsers = node_parser.add_subparsers(metavar='<node_cmd>', title='node commands', dest='node_cmd')
-node_subparsers.add_parser('show', help="Display information on a node")
-node_subparsers.add_parser('remove', help="Remove a node (stopping it if necessary and deleting all its data)")
-node_subparsers.add_parser('showlog', help="Show the log of node name (runs your $PAGER on its system.log)")
-node_subparsers.add_parser('setlog', help="Set node name log level (INFO, DEBUG, ...) with/without Java class - require a node restart")
-node_subparsers.add_parser('start', help="Start a node")
-node_subparsers.add_parser('stop', help="Stop a node")
-node_subparsers.add_parser('ring', help="Print ring (connecting to node name)")
-node_subparsers.add_parser('flush', help="Flush node name")
-node_subparsers.add_parser('compact', help="Compact node name")
-node_subparsers.add_parser('drain', help="Drain node name")
-node_subparsers.add_parser('cleanup', help="Run cleanup on node name")
-node_subparsers.add_parser('repair', help="Run repair on node name")
-node_subparsers.add_parser('scrub', help="Scrub files")
-node_subparsers.add_parser('verify', help="Verify files")
-node_subparsers.add_parser('shuffle', help="Run shuffle on a node")
-node_subparsers.add_parser('sstablesplit', help="Run sstablesplit on the sstables of this node")
-node_subparsers.add_parser('getsstables', help="Run getsstables to get absolute path of sstables in this node")
-node_subparsers.add_parser('decommission', help="Run decommission on node name")
-node_subparsers.add_parser('json', help="Call sstable2json/sstabledump on the sstables of this node")
-node_subparsers.add_parser('updateconf', help="Update the cassandra config files for this node (useful when updating cassandra)")
-node_subparsers.add_parser('updatelog4j', help="Update the Cassandra log4j-server.properties configuration file under given node")
-node_subparsers.add_parser('stress', help="Run stress on a node")
-node_subparsers.add_parser('cli', help="Launch a cassandra cli connected to this node")
-node_subparsers.add_parser('cqlsh', help="Launch a cqlsh session connected to this node")
-node_subparsers.add_parser('scrub', help="Scrub files")
-node_subparsers.add_parser('verify', help="Verify files")
-node_subparsers.add_parser('status', help="Print status (connecting to node name)")
-node_subparsers.add_parser('setdir', help="Set the cassandra directory to use for the node")
-node_subparsers.add_parser('bulkload', help="Bulkload files into the cluster by connecting to this node")
-node_subparsers.add_parser('version', help="Get the cassandra version of node")
-node_subparsers.add_parser('nodetool', help="Run nodetool (connecting to node name)")
-node_subparsers.add_parser('dsetool', help="Run dsetool (connecting to node name)")
-node_subparsers.add_parser('setworkload', help="Sets the workloads for a DSE node")
-node_subparsers.add_parser('dse', help="Launch a dse client application connected to this node")
-node_subparsers.add_parser('hadoop', help="Launch a hadoop session connected to this node")
-node_subparsers.add_parser('hive', help="Launch a hive session connected to this node")
-node_subparsers.add_parser('pig', help="Launch a pig session connected to this node")
-node_subparsers.add_parser('sqoop', help="Launch a sqoop session connected to this node")
-node_subparsers.add_parser('spark', help="Launch a spark session connected to this node")
-node_subparsers.add_parser('pause', help="Send a SIGSTOP to this node")
-node_subparsers.add_parser('resume', help="Send a SIGCONT to this node")
-node_subparsers.add_parser('jconsole', help="Opens jconsole client and connect to running node")
-node_subparsers.add_parser('versionfrombuild', help="Print the node's version as grepped from build.xml. Can be used when the node isn't running.")
-node_subparsers.add_parser('byteman', help="Invoke byteman-submit")
+commands = [
+    ('show', "Display information on a node"),
+    ('remove', "Remove a node (stopping it if necessary and deleting all its data)"),
+    ('showlog', "Show the log of node name (runs your $PAGER on its system.log)"),
+    ('setlog', "Set node name log level (INFO, DEBUG, ...) with/without Java class - require a node restart"),
+    ('start', "Start a node"),
+    ('stop', "Stop a node"),
+    ('ring', "Print ring (connecting to node name)"),
+    ('flush', "Flush node name"),
+    ('compact', "Compact node name"),
+    ('drain', "Drain node name"),
+    ('cleanup', "Run cleanup on node name"),
+    ('repair', "Run repair on node name"),
+    ('scrub', "Scrub files"),
+    ('verify', "Verify files"),
+    ('shuffle', "Run shuffle on a node"),
+    ('sstablesplit', "Run sstablesplit on the sstables of this node"),
+    ('getsstables', "Run getsstables to get absolute path of sstables in this node"),
+    ('decommission', "Run decommission on node name"),
+    ('json', "Call sstable2json/sstabledump on the sstables of this node"),
+    ('updateconf', "Update the cassandra config files for this node (useful when updating cassandra)"),
+    ('updatelog4j', "Update the Cassandra log4j-server.properties configuration file under given node"),
+    ('stress', "Run stress on a node"),
+    ('cli', "Launch a cassandra cli connected to this node"),
+    ('cqlsh', "Launch a cqlsh session connected to this node"),
+    ('scrub', "Scrub files"),
+    ('verify', "Verify files"),
+    ('status', "Print status (connecting to node name)"),
+    ('setdir', "Set the cassandra directory to use for the node"),
+    ('bulkload', "Bulkload files into the cluster by connecting to this node"),
+    ('version', "Get the cassandra version of node"),
+    ('nodetool', "Run nodetool (connecting to node name)"),
+    ('dsetool', "Run dsetool (connecting to node name)"),
+    ('setworkload', "Sets the workloads for a DSE node"),
+    ('dse', "Launch a dse client application connected to this node"),
+    ('hadoop', "Launch a hadoop session connected to this node"),
+    ('hive', "Launch a hive session connected to this node"),
+    ('pig', "Launch a pig session connected to this node"),
+    ('sqoop', "Launch a sqoop session connected to this node"),
+    ('spark', "Launch a spark session connected to this node"),
+    ('pause', "Send a SIGSTOP to this node"),
+    ('resume', "Send a SIGCONT to this node"),
+    ('jconsole', "Opens jconsole client and connect to running node"),
+    ('versionfrombuild', "Print the node's version as grepped from build.xml. Can be used when the node isn't running."),
+    ('byteman', "Invoke byteman-submit"),
+]
