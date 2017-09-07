@@ -1,12 +1,5 @@
 import signal
-from ccmlib import common
-
-if common.is_win():
-    # Fill the dictionary with SIGTERM as the cluster is killed forcefully
-    # on Windows regardless of assigned signal (TASKKILL is used)
-    default_signal_events = {'1': signal.SIGTERM, '9': signal.SIGTERM}
-else:
-    default_signal_events = {'1': signal.SIGHUP, '9': signal.SIGKILL}
+from ccmlib.common import get_default_signals
 
 commands = [
     ('show', "Display information on a node"),
@@ -85,8 +78,8 @@ options['start'] = [
 options['stop'] = [
     (['--no-wait'], {'action': "store_true", 'dest': "no_wait", 'help': "Do not wait for the node to be stopped", 'default': False}),
     (['-g', '--gently'], {'action': "store_const", 'dest': "signal_event", 'help': "Shut down gently (default)", 'const': signal.SIGTERM, 'default': signal.SIGTERM}),
-    (['--hang-up'], {'action': "store_const", 'dest': "signal_event", 'help': "Shut down via hang up (kill -1)", 'const': default_signal_events['1']}),
-    (['--not-gently'], {'action': "store_const", 'dest': "signal_event", 'help': "Shut down immediately (kill -9)", 'const': default_signal_events['9']}),
+    (['--hang-up'], {'action': "store_const", 'dest': "signal_event", 'help': "Shut down via hang up (kill -1)", 'const': get_default_signals['1']}),
+    (['--not-gently'], {'action': "store_const", 'dest': "signal_event", 'help': "Shut down immediately (kill -9)", 'const': get_default_signals['9']}),
 ]
 
 options['nodetool'] = []

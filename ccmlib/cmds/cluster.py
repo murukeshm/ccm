@@ -1,12 +1,5 @@
 import signal
-from ccmlib import common
-
-if common.is_win():
-    # Fill the dictionary with SIGTERM as the cluster is killed forcefully
-    # on Windows regardless of assigned signal (TASKKILL is used)
-    default_signal_events = {'1': signal.SIGTERM, '9': signal.SIGTERM}
-else:
-    default_signal_events = {'1': signal.SIGHUP, '9': signal.SIGKILL}
+from ccmlib.common import get_default_signals, get_default_path_display_name
 
 commands = [
     ('add', "Add a new node to the current cluster"),
@@ -48,7 +41,7 @@ options['create'] = [
     (["--dse"], {'action': "store_true", 'help': "Use with -v to indicate that the version being loaded is DSE"}),
     (["--dse-username"], {'help': "The username to use to download DSE with", 'default': None}),
     (["--dse-password"], {'help': "The password to use to download DSE with", 'default': None}),
-    (["--dse-credentials"], {'dest': "dse_credentials_file", 'help': "An ini-style config file containing the dse_username and dse_password under a dse_credentials section. [default to {}/.dse.ini if it exists]".format(common.get_default_path_display_name()), 'default': None}),
+    (["--dse-credentials"], {'dest': "dse_credentials_file", 'help': "An ini-style config file containing the dse_username and dse_password under a dse_credentials section. [default to {}/.dse.ini if it exists]".format(get_default_path_display_name()), 'default': None}),
     (["--install-dir"], {'help': "Path to the cassandra or dse directory to use [default %(default)s]", 'default': "./"}),
     (['-n', '--nodes'], {'help': "Populate the new cluster with that number of nodes (a single int or a colon-separate list of ints for multi-dc setups)"}),
     (['-i', '--ipprefix'], {'help': "Ipprefix to use to create the ip of a node while populating"}),
@@ -132,8 +125,8 @@ options['stop'] = [
     (['-v', '--verbose'], {'action': "store_true", 'dest': "verbose", 'help': "Print nodes that were not running", 'default': False}),
     (['--no-wait'], {'action': "store_true", 'dest': "no_wait", 'help': "Do not wait for the node to be stopped", 'default': False}),
     (['-g', '--gently'], {'action': "store_const", 'dest': "signal_event", 'help': "Shut down gently (default)", 'const': signal.SIGTERM, 'default': signal.SIGTERM}),
-    (['--hang-up'], {'action': "store_const", 'dest': "signal_event", 'help': "Shut down via hang up (kill -1)", 'const': default_signal_events['1']}),
-    (['--not-gently'], {'action': "store_const", 'dest': "signal_event", 'help': "Shut down immediately (kill -9)", 'const': default_signal_events['9']}),
+    (['--hang-up'], {'action': "store_const", 'dest': "signal_event", 'help': "Shut down via hang up (kill -1)", 'const': get_default_signals()['1']}),
+    (['--not-gently'], {'action': "store_const", 'dest': "signal_event", 'help': "Shut down immediately (kill -9)", 'const': get_default_signals()['9']}),
 ]
 
 options['flush'] = []

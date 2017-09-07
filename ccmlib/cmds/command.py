@@ -1,7 +1,6 @@
 
 from __future__ import absolute_import
 
-import argparse
 import sys
 from optparse import BadOptionError, Option, OptionParser
 import re
@@ -10,11 +9,6 @@ from six import print_
 
 from ccmlib import common
 from ccmlib.cluster_factory import ClusterFactory
-
-
-class ThrowingParser(argparse.ArgumentParser):
-    def error(self, message):
-        raise argparse.ArgumentError(None, message)
 
 
 # This is fairly fragile, but handy for now
