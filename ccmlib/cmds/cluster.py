@@ -1,6 +1,13 @@
 import signal
 from ccmlib import common
 
+if common.is_win():
+    # Fill the dictionary with SIGTERM as the cluster is killed forcefully
+    # on Windows regardless of assigned signal (TASKKILL is used)
+    default_signal_events = {'1': signal.SIGTERM, '9': signal.SIGTERM}
+else:
+    default_signal_events = {'1': signal.SIGHUP, '9': signal.SIGKILL}
+
 commands = [
     ('add', "Add a new node to the current cluster"),
     ('create', "Create a new cluster"),
@@ -102,7 +109,7 @@ options['liveset'] = []
 
 options['setdir'] = [
     (['-v', "--version"], {'dest': "version", 'help': "Download and use provided cassandra or dse version. If version is of the form 'git:<branch name>', then the specified cassandra branch will be downloaded from the git repo and compiled. (takes precedence over --install-dir)", 'default': None}),
-    (["--install-dir"], {'dest': "install_dir", 'help': "Path to the cassandra or dse directory to use [default %default]", 'default': "./"}),
+    (["--install-dir"], {'dest': "install_dir", 'help': "Path to the cassandra or dse directory to use [default %(default)s]", 'default': "./"}),
     (['-n', '--node'], {'dest': "node", 'help': "Set directory only for the specified node"}),
 ]
 
@@ -121,13 +128,6 @@ options['start'] = [
     (['--root'], {'action': "store_true", 'dest': "allow_root", 'help': "Allow CCM to start cassandra as root", 'default': False}),
 ]
 
-if common.is_win():
-    # Fill the dictionary with SIGTERM as the cluster is killed forcefully
-    # on Windows regardless of assigned signal (TASKKILL is used)
-    default_signal_events = {'1': signal.SIGTERM, '9': signal.SIGTERM}
-else:
-    default_signal_events = {'1': signal.SIGHUP, '9': signal.SIGKILL}
-
 options['stop'] = [
     (['-v', '--verbose'], {'action': "store_true", 'dest': "verbose", 'help': "Print nodes that were not running", 'default': False}),
     (['--no-wait'], {'action': "store_true", 'dest': "no_wait", 'help': "Do not wait for the node to be stopped", 'default': False}),
@@ -145,7 +145,7 @@ options['updateconf'] = [
     (['--no-hh', '--no-hinted-handoff'], {'action': "store_false", 'dest': "hinted_handoff", 'default': True, 'help': "Disable hinted handoff"}),
     (['--batch-cl', '--batch-commit-log'], {'action': "store_true", 'dest': "cl_batch", 'default': None, 'help': "Set commit log to batch mode"}),
     (['--periodic-cl', '--periodic-commit-log'], {'action': "store_true", 'dest': "cl_periodic", 'default': None, 'help': "Set commit log to periodic mode"}),
-    (['--rt', '--rpc-timeout'], {'action': "store", 'type': 'int', 'dest': "rpc_timeout", 'help': "Set rpc timeout"}),
+    (['--rt', '--rpc-timeout'], {'action': "store", 'type': int, 'dest': "rpc_timeout", 'help': "Set rpc timeout"}),
     (['-y', '--yaml'], {'action': "store_true", 'dest': "literal_yaml", 'default': False, 'help': "If enabled, treat argument as yaml, not kv pairs. Option syntax looks like ccm updateconf -y 'a: [b: [c,d]]'"}),
 ]
 

@@ -3,15 +3,8 @@
 import argparse
 import sys
 
-import ccmlib.cmds.cluster_parser
-import ccmlib.cmds.node_parser
 from ccmlib import common
-
-# parser = argparse.ArgumentParser()
-# group = parser.add_mutually_exclusive_group(required=True)
-# group.add_argument('node_name', type=str, nargs='?', help='node name')
-# group.add_argument('cluster_cmd', type=str, nargs='?', help='cluster command', metavar='cluster_cmd', choices=cluster_commands)
-# parser.add_argument('args', type=str, nargs='*', help='args')
+from ccmlib.cmds import cluster, node
 
 
 class ThrowingParser(argparse.ArgumentParser):
@@ -22,10 +15,9 @@ class ThrowingParser(argparse.ArgumentParser):
 def add_subcmd_parsers(parsers, commands, options):
     for cmd, cmd_help in commands:
         parser = parsers.add_parser(cmd, help=cmd_help)
-        if cmd in options:
-            options = options[cmd]
-            for args, kwargs in options:
-                parser.add_argument(*args, **kwargs)
+        opts = options[cmd]
+        for args, kwargs in opts:
+            parser.add_argument(*args, **kwargs)
 
 
 cluster_parser = ThrowingParser()
@@ -36,6 +28,9 @@ cluster_parser.add_argument('--config-dir', type=str, dest="config_dir",
 node_parser = ThrowingParser()
 node_parser.add_argument('node_name', type=str, nargs=1, help='node name')
 node_subparsers = node_parser.add_subparsers(metavar='<node_cmd>', title='node commands', dest='node_cmd')
+
+add_subcmd_parsers(cluster_subparsers, cluster.commands, cluster.options)
+add_subcmd_parsers(node_subparsers, node.commands, node.options)
 
 try:
     args = cluster_parser.parse_known_args()
