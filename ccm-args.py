@@ -19,10 +19,9 @@ def get_command_class(module, cmd):
 
 
 def add_subcmd_parsers(parsers, module):
-    commands = module.commands()
-    for cmd in commands:
-        cmd_help = commands[cmd]
+    for cmd in module.commands():
         klass = get_command_class(module, cmd)
+        cmd_help = klass.descr_text
         parser = parsers.add_parser(cmd, help=cmd_help)
         parser.set_defaults(klass=klass)
         for args, kwargs in klass.options:

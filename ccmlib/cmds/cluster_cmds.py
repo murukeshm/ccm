@@ -19,37 +19,36 @@ from ccmlib.node import Node, NodeError
 
 KIND = 'cluster'
 
-CLUSTER_CMDS = {
-    'add': "Add a new node to the current cluster",
-    'create': "Create a new cluster",
-    'populate': "Add a group of new nodes with default options",
-    'list': "List existing clusters",
-    'switch': "Switch of current (active) cluster",
-    'status': "Display status on the current cluster",
-    'remove': "Remove the current or specified cluster (delete all data)",
-    'clear': "Clear the current cluster data (and stop all nodes)",
-    'liveset': "Print a comma-separated list of addresses of running nodes (helpful in scripts)",
-    'start': "Start all the non started nodes of the current cluster",
-    'stop': "Stop all the nodes of the cluster",
-    'flush': "Flush all (running) nodes of the cluster",
-    'compact': "Compact all (running) node of the cluster",
-    'stress': "Run stress using all live nodes",
-    'updateconf': "Update the cassandra config files for all nodes",
-    'updatedseconf': "Update the dse config files for all nodes",
-    'updatelog4j': "Update the Cassandra log4j-server.properties configuration file on all nodes",
-    'cli': "Launch cassandra cli connected to some live node (if any)",
-    'setdir': "Set the install directory (cassandra or dse) to use",
-    'bulkload': "Bulkload files into the cluster by connecting to some live node (if any)",
-    'setlog': "Set log level (INFO, DEBUG, ...) with/without Java class for all node of the cluster - require a node restart",
-    'scrub': "Scrub files",
-    'verify': "Verify files",
-    'invalidatecache': "Destroys ccm's local git cache.",
-    'checklogerror': "Check for errors in log file of each node.",
-    'showlastlog': "Show the last.log for the most recent build through your $PAGER",
-    'jconsole': "Opens jconsole client and connects to all running nodes",
-    'setworkload': "Sets the workloads for a DSE cluster",
-}
-
+CLUSTER_CMDS = [
+    "create",
+    "add",
+    "populate",
+    "list",
+    "switch",
+    "status",
+    "remove",
+    "clear",
+    "liveset",
+    "start",
+    "stop",
+    "flush",
+    "compact",
+    "stress",
+    "updateconf",
+    "updatedseconf",
+    "updatelog4j",
+    "cli",
+    "setdir",
+    "bulkload",
+    "setlog",
+    "scrub",
+    "verify",
+    "invalidatecache",
+    "checklogerror",
+    "showlastlog",
+    "jconsole",
+    "setworkload"
+]
 
 def commands():
     return CLUSTER_CMDS
@@ -97,6 +96,8 @@ class ClusterCreateCmd(Cmd):
         (['--datadirs'], {'type': int, 'help': "Number of data directories to use", 'default': 1}),
         (['cluster_name'], {'type': valid_name, 'help': "Name of cluster to be created"}),
     ]
+
+    descr_text = "Create a new cluster"
 
     def description(self):
         return "Create a new cluster"
@@ -268,6 +269,8 @@ class ClusterAddCmd(Cmd):
         (['node_name'], {'type': valid_name, 'help': "Name of node to be added"}),
     ]
 
+    descr_text = "Add a new node to the current cluster"
+
     def description(self):
         return "Add a new node to the current cluster"
 
@@ -357,6 +360,8 @@ class ClusterPopulateCmd(Cmd):
         (['-I', '--ip-format'], {'help': "Format to use when creating the ip of a node (supports enumerating ipv6-type addresses like fe80::%%d%%lo0)"}),
     ]
 
+    descr_text = "Add a group of new nodes with default options"
+
     def description(self):
         return "Add a group of new nodes with default options"
 
@@ -405,6 +410,8 @@ class ClusterPopulateCmd(Cmd):
 class ClusterListCmd(Cmd):
     options = []
 
+    descr_text = "List existing clusters"
+
     def description(self):
         return "List existing clusters"
 
@@ -431,6 +438,8 @@ class ClusterSwitchCmd(Cmd):
         (['cluster_name'], {'type': valid_name, 'help': "Name of cluster to switch to"}),
     ]
 
+    descr_text = "Switch of current (active) cluster"
+
     def description(self):
         return "Switch of current (active) cluster"
 
@@ -453,6 +462,8 @@ class ClusterStatusCmd(Cmd):
         (['-v', '--verbose'], {'action': "store_true", 'help': "Print full information on all nodes", 'default': False}),
     ]
 
+    descr_text = "Display status on the current cluster"
+
     def description(self):
         return "Display status on the current cluster"
 
@@ -474,6 +485,8 @@ class ClusterRemoveCmd(Cmd):
     options = [
         (['cluster_name'], {'type': valid_name, 'nargs': '?', 'help': "Name of cluster to remove. If not given, remove current cluster."}),
     ]
+
+    descr_text = "Remove the current or specified cluster (delete all data)"
 
     def description(self):
         return "Remove the current or specified cluster (delete all data)"
@@ -516,6 +529,8 @@ class ClusterRemoveCmd(Cmd):
 class ClusterClearCmd(Cmd):
     options = []
 
+    descr_text = "Clear the current cluster data (and stop all nodes)"
+
     def description(self):
         return "Clear the current cluster data (and stop all nodes)"
 
@@ -533,6 +548,8 @@ class ClusterClearCmd(Cmd):
 
 class ClusterLivesetCmd(Cmd):
     options = []
+
+    descr_text = "Print a comma-separated list of addresses of running nodes (helpful in scripts)"
 
     def description(self):
         return "Print a comma-separated list of addresses of running nodes (helpful in scripts)"
@@ -556,6 +573,8 @@ class ClusterSetdirCmd(Cmd):
         (["--install-dir"], {'dest': "install_dir", 'help': "Path to the cassandra or dse directory to use [default %(default)s]", 'default': "./"}),
         (['-n', '--node'], {'dest': "node", 'help': "Set directory only for the specified node"}),
     ]
+
+    descr_text = "Set the install directory (cassandra or dse) to use"
 
     def description(self):
         return "Set the install directory (cassandra or dse) to use"
@@ -591,6 +610,8 @@ class ClusterSetdirCmd(Cmd):
 class ClusterClearrepoCmd(Cmd):
     options = []
 
+    descr_text = "Cleanup downloaded cassandra sources"
+
     def description(self):
         return "Cleanup downloaded cassandra sources"
 
@@ -619,6 +640,8 @@ class ClusterStartCmd(Cmd):
         (['--quiet-windows'], {'action': "store_true", 'dest': "quiet_start", 'help': "Pass -q on Windows 2.2.4+ and 3.0+ startup. Ignored on linux.", 'default': False}),
         (['--root'], {'action': "store_true", 'dest': "allow_root", 'help': "Allow CCM to start cassandra as root", 'default': False}),
     ]
+
+    descr_text = "Start all the non started nodes of the current cluster"
 
     def description(self):
         return "Start all the non started nodes of the current cluster"
@@ -697,6 +720,8 @@ class ClusterStopCmd(Cmd):
         (['--not-gently'], {'action': "store_const", 'dest': "signal_event", 'help': "Shut down immediately (kill -9)", 'const': get_default_signals()['9']}),
         (['cluster_name'], {'type': valid_name, 'nargs': '?', 'help': "Name of target cluster. If not given, use current cluster."}),
     ]
+
+    descr_text = "Stop all the nodes of the cluster"
 
     def description(self):
         return "Stop all the nodes of the cluster"
@@ -793,6 +818,8 @@ class ClusterStressCmd(Cmd):
         (['args'], {'nargs': '*', 'help': "options for cassandra stress"}),
     ]
 
+    descr_text = "Run stress using all live nodes"
+
     def description(self):
         return "Run stress using all live nodes"
 
@@ -823,6 +850,8 @@ class ClusterUpdateconfCmd(Cmd):
         (['-y', '--yaml'], {'action': "store_true", 'dest': "literal_yaml", 'default': False, 'help': "If enabled, treat argument as yaml, not kv pairs. Option syntax looks like ccm updateconf -y 'a: [b: [c,d]]'"}),
         (['new_setting'], {'nargs': '+', 'help': "where new_setting should be a string of the form 'compaction_throughput_mb_per_sec: 32'; nested options can be separated with a period like 'client_encryption_options.enabled: false'"}),
     ]
+
+    descr_text = "Update the cassandra config files for all nodes"
 
     def description(self):
         return "Update the cassandra config files for all nodes"
@@ -879,6 +908,8 @@ class ClusterUpdatedseconfCmd(Cmd):
         (['new_setting'], {'nargs': '+', 'help': "where new_setting should be a string of the form 'compaction_throughput_mb_per_sec: 32'; nested options can be separated with a period like 'client_encryption_options.enabled: false'"}),
     ]
 
+    descr_text = "Update the dse config files for all nodes"
+
     def description(self):
         return "Update the dse config files for all nodes"
 
@@ -910,6 +941,8 @@ class ClusterUpdatelog4jCmd(Cmd):
     options = [
         (['-p', '--path'], {'dest': "log4jpath", 'help': "Path to new Cassandra log4j configuration file"}),
     ]
+
+    descr_text = "Update the Cassandra log4j-server.properties configuration file on all nodes"
 
     def description(self):
         return "Update the Cassandra log4j-server.properties configuration file on all nodes"
@@ -949,6 +982,8 @@ class ClusterCliCmd(Cmd):
         (['args'], {'nargs': '*', 'help': "options for cassandra cli"}),
     ]
 
+    descr_text = "Launch cassandra cli connected to some live node (if any)"
+
     def description(self):
         return "Launch cassandra cli connected to some live node (if any)"
 
@@ -979,6 +1014,8 @@ class ClusterBulkloadCmd(Cmd):
         (['sstable_dir'], {'help': "sstable directory"}),
     ]
 
+    descr_text = "Bulkload files into the cluster by connecting to some live node (if any)"
+
     def description(self):
         return "Bulkload files into the cluster by connecting to some live node (if any)"
 
@@ -1000,6 +1037,8 @@ class ClusterScrubCmd(Cmd):
         (['keyspace'], {'help': "Keyspace"}),
         (['cf'], {'help': "Table/Column Family"}),
     ]
+
+    descr_text = "Scrub files"
 
     def description(self):
         return "Scrub files"
@@ -1023,6 +1062,8 @@ class ClusterVerifyCmd(Cmd):
         (['cf'], {'help': "Table/Column Family"}),
     ]
 
+    descr_text = "Verify files"
+
     def description(self):
         return "Verify files"
 
@@ -1044,6 +1085,8 @@ class ClusterSetlogCmd(Cmd):
         (['-c', '--class'], {'dest': "class_name", 'default': None, 'help': "Optional java class/package. Logging will be set for only this class/package if set"}),
         (['level'], {'help': "Log level"}),
     ]
+
+    descr_text = "Set log level (INFO, DEBUG, ...) with/without Java class for all node of the cluster - require a node restart"
 
     def description(self):
         return "Set log level (INFO, DEBUG, ...) with/without Java class for all node of the cluster - require a node restart"
@@ -1074,6 +1117,8 @@ class ClusterSetlogCmd(Cmd):
 class ClusterInvalidatecacheCmd(Cmd):
     options = []
 
+    descr_text = "Destroys ccm's local git cache."
+
     def description(self):
         return "Destroys ccm's local git cache."
 
@@ -1097,6 +1142,8 @@ class ClusterInvalidatecacheCmd(Cmd):
 class ClusterChecklogerrorCmd(Cmd):
     options = []
 
+    descr_text = "Check for errors in log file of each node."
+
     def description(self):
         return "Check for errors in log file of each node."
 
@@ -1119,6 +1166,8 @@ class ClusterChecklogerrorCmd(Cmd):
 class ClusterShowlastlogCmd(Cmd):
     options = []
 
+    descr_text = "Show the last.log for the most recent build through your $PAGER"
+
     def description(self):
         return "Show the last.log for the most recent build through your $PAGER"
 
@@ -1137,6 +1186,8 @@ class ClusterShowlastlogCmd(Cmd):
 
 class ClusterJconsoleCmd(Cmd):
     options = []
+
+    descr_text = "Opens jconsole client and connects to all running nodes"
 
     def description(self):
         return "Opens jconsole client and connects to all running nodes"
@@ -1161,6 +1212,8 @@ class ClusterSetworkloadCmd(Cmd):
     options = [
         (['workload'], {'choices': ['cassandra', 'solr', 'hadoop', 'spark', 'dsefs', 'cfs', 'graph']})
     ]
+
+    descr_text = "Sets the workloads for a DSE cluster"
 
     def description(self):
         return "Sets the workloads for a DSE cluster"
