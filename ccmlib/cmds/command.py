@@ -1,6 +1,7 @@
 
 from __future__ import absolute_import
 
+import argparse
 import sys
 from optparse import BadOptionError, Option, OptionParser
 import re
@@ -9,6 +10,22 @@ from six import print_
 
 from ccmlib import common
 from ccmlib.cluster_factory import ClusterFactory
+
+
+def valid_name(name):
+    if not re.match('^[a-zA-Z0-9_-]+$', name):
+        print_('Cluster/node names should only contain word characters or hyphen', file=sys.stderr)
+        sys.exit(1)
+    else:
+        return name
+
+
+class ThrowingParser(argparse.ArgumentParser):
+    """ ArgumentParser variant that throws exceptions instead of exiting
+    Courtesy of https://stackoverflow.com/a/14728477/2072269
+    """
+    def error(self, message):
+        raise argparse.ArgumentError(None, message)
 
 
 # This is fairly fragile, but handy for now

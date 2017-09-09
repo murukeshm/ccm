@@ -10,61 +10,65 @@ from six import print_
 
 from ccmlib import common
 from ccmlib.cmds.command import Cmd
+from ccmlib.common import get_default_signals
 from ccmlib.node import NodeError
 
-NODE_CMDS = [
-    "show",
-    "remove",
-    "showlog",
-    "setlog",
-    "start",
-    "stop",
-    "ring",
-    "flush",
-    "compact",
-    "drain",
-    "cleanup",
-    "repair",
-    "scrub",
-    "verify",
-    "shuffle",
-    "sstablesplit",
-    "getsstables",
-    "decommission",
-    "json",
-    "updateconf",
-    "updatelog4j",
-    "stress",
-    "cli",
-    "cqlsh",
-    "scrub",
-    "verify",
-    "status",
-    "setdir",
-    "bulkload",
-    "version",
-    "nodetool",
-    "dsetool",
-    "setworkload",
-    "dse",
-    "hadoop",
-    "hive",
-    "pig",
-    "sqoop",
-    "spark",
-    "pause",
-    "resume",
-    "jconsole",
-    "versionfrombuild",
-    "byteman"
-]
+KIND = 'node'
+
+NODE_CMDS = {
+    'show': "Display information on a node",
+    'remove': "Remove a node (stopping it if necessary and deleting all its data)",
+    'showlog': "Show the log of node name (runs your $PAGER on its system.log)",
+    'setlog': "Set node name log level (INFO, DEBUG, ...) with/without Java class - require a node restart",
+    'start': "Start a node",
+    'stop': "Stop a node",
+    'ring': "Print ring (connecting to node name)",
+    'flush': "Flush node name",
+    'compact': "Compact node name",
+    'drain': "Drain node name",
+    'cleanup': "Run cleanup on node name",
+    'repair': "Run repair on node name",
+    'scrub': "Scrub files",
+    'verify': "Verify files",
+    'shuffle': "Run shuffle on a node",
+    'sstablesplit': "Run sstablesplit on the sstables of this node",
+    'getsstables': "Run getsstables to get absolute path of sstables in this node",
+    'decommission': "Run decommission on node name",
+    'json': "Call sstable2json/sstabledump on the sstables of this node",
+    'updateconf': "Update the cassandra config files for this node (useful when updating cassandra)",
+    'updatelog4j': "Update the Cassandra log4j-server.properties configuration file under given node",
+    'stress': "Run stress on a node",
+    'cli': "Launch a cassandra cli connected to this node",
+    'cqlsh': "Launch a cqlsh session connected to this node",
+    'scrub': "Scrub files",
+    'verify': "Verify files",
+    'status': "Print status (connecting to node name)",
+    'setdir': "Set the cassandra directory to use for the node",
+    'bulkload': "Bulkload files into the cluster by connecting to this node",
+    'version': "Get the cassandra version of node",
+    'nodetool': "Run nodetool (connecting to node name)",
+    'dsetool': "Run dsetool (connecting to node name)",
+    'setworkload': "Sets the workloads for a DSE node",
+    'dse': "Launch a dse client application connected to this node",
+    'hadoop': "Launch a hadoop session connected to this node",
+    'hive': "Launch a hive session connected to this node",
+    'pig': "Launch a pig session connected to this node",
+    'sqoop': "Launch a sqoop session connected to this node",
+    'spark': "Launch a spark session connected to this node",
+    'pause': "Send a SIGSTOP to this node",
+    'resume': "Send a SIGCONT to this node",
+    'jconsole': "Opens jconsole client and connect to running node",
+    'versionfrombuild': "Print the node's version as grepped from build.xml. Can be used when the node isn't running.",
+    'byteman': "Invoke byteman-submit",
+}
 
 
-def node_cmds():
+def commands():
     return NODE_CMDS
 
 
 class NodeShowCmd(Cmd):
+    options = []
 
     def description(self):
         return "Display information on a node"
@@ -81,6 +85,7 @@ class NodeShowCmd(Cmd):
 
 
 class NodeRemoveCmd(Cmd):
+    options = []
 
     def description(self):
         return "Remove a node (stopping it if necessary and deleting all its data)"
@@ -97,6 +102,7 @@ class NodeRemoveCmd(Cmd):
 
 
 class NodeShowlogCmd(Cmd):
+    options = []
 
     def description(self):
         return "Show the log of node name (runs your $PAGER on its system.log)"
@@ -115,6 +121,9 @@ class NodeShowlogCmd(Cmd):
 
 
 class NodeSetlogCmd(Cmd):
+    options = [
+        (['-c', '--class'], {'dest': "class_name", 'default': None, 'help': "Optional java class/package. Logging will be set for only this class/package if set"}),
+    ]
 
     def description(self):
         return "Set node name log level (INFO, DEBUG, ...) with/without Java class - require a node restart"
@@ -149,6 +158,9 @@ class NodeSetlogCmd(Cmd):
 
 
 class NodeClearCmd(Cmd):
+    options = [
+        (['-a', '--all'], {'action': "store_true", 'dest': "all", 'help': "Also clear the saved cache and node log files", 'default': False}),
+    ]
 
     def description(self):
         return "Clear the node data & logs (and stop the node)"
@@ -169,6 +181,18 @@ class NodeClearCmd(Cmd):
 
 
 class NodeStartCmd(Cmd):
+    options = [
+        (['-v', '--verbose'], {'action': "store_true", 'dest': "verbose", 'help': "Print standard output of cassandra process", 'default': False}),
+        (['--no-wait'], {'action': "store_true", 'dest': "no_wait", 'help': "Do not wait for cassandra node to be ready", 'default': False}),
+        (['--wait-other-notice'], {'action': "store_true", 'dest': "deprecate", 'help': "DEPRECATED/IGNORED: Use '--skip-wait-other-notice' instead. This is now on by default.", 'default': False}),
+        (['--skip-wait-other-notice'], {'action': "store_false", 'dest': "wait_other_notice", 'help': "Skip waiting until all live nodes of the cluster have marked the other nodes UP", 'default': True}),
+        (['--wait-for-binary-proto'], {'action': "store_true", 'dest': "wait_for_binary_proto", 'help': "Wait for the binary protocol to start", 'default': False}),
+        (['-j', '--dont-join-ring'], {'action': "store_true", 'dest': "no_join_ring", 'help': "Launch the instance without joining the ring", 'default': False}),
+        (['--replace-address'], {'dest': "replace_address", 'default': None, 'help': "Replace a node in the ring through the cassandra.replace_address option"}),
+        (['--jvm_arg'], {'action': "append", 'dest': "jvm_args", 'help': "Specify a JVM argument", 'default': []}),
+        (['--quiet-windows'], {'action': "store_true", 'dest': "quiet_start", 'help': "Pass -q on Windows 2.2.4+ and 3.0+ startup. Ignored on linux.", 'default': False}),
+        (['--root'], {'action': "store_true", 'dest': "allow_root", 'help': "Allow CCM to start cassandra as root", 'default': False}),
+    ]
 
     def description(self):
         return "Start a node"
@@ -219,6 +243,12 @@ class NodeStartCmd(Cmd):
 
 
 class NodeStopCmd(Cmd):
+    options = [
+        (['--no-wait'], {'action': "store_true", 'dest': "no_wait", 'help': "Do not wait for the node to be stopped", 'default': False}),
+        (['-g', '--gently'], {'action': "store_const", 'dest': "signal_event", 'help': "Shut down gently (default)", 'const': signal.SIGTERM, 'default': signal.SIGTERM}),
+        (['--hang-up'], {'action': "store_const", 'dest': "signal_event", 'help': "Shut down via hang up (kill -1)", 'const': get_default_signals()['1']}),
+        (['--not-gently'], {'action': "store_const", 'dest': "signal_event", 'help': "Shut down immediately (kill -9)", 'const': get_default_signals()['9']}),
+    ]
 
     def description(self):
         return "Stop a node"
@@ -235,9 +265,9 @@ class NodeStopCmd(Cmd):
         if common.is_win():
             # Fill the dictionary with SIGTERM as the cluster is killed forcefully
             # on Windows regardless of assigned signal (TASKKILL is used)
-            default_signal_events = { '1': signal.SIGTERM, '9': signal.SIGTERM }
+            default_signal_events = {'1': signal.SIGTERM, '9': signal.SIGTERM}
         else:
-            default_signal_events = { '1': signal.SIGHUP, '9': signal.SIGKILL }
+            default_signal_events = {'1': signal.SIGHUP, '9': signal.SIGKILL}
 
         parser.add_option('--hang-up', action="store_const", dest="signal_event",
                           help="Shut down via hang up (kill -1)",
@@ -282,6 +312,7 @@ class _NodeToolCmd(Cmd):
 
 
 class NodeNodetoolCmd(_NodeToolCmd):
+    options = []
     usage = "usage: ccm node_name nodetool [options]"
     descr_text = "Run nodetool (connecting to node name)"
 
@@ -292,54 +323,65 @@ class NodeNodetoolCmd(_NodeToolCmd):
 
 
 class NodeRingCmd(_NodeToolCmd):
+    options = []
     usage = "usage: ccm node_name ring [options]"
     nodetool_cmd = 'ring'
     descr_text = "Print ring (connecting to node name)"
 
 
 class NodeStatusCmd(_NodeToolCmd):
+    options = []
     usage = "usage: ccm node_name status [options]"
     nodetool_cmd = 'status'
     descr_text = "Print status (connecting to node name)"
 
 
 class NodeFlushCmd(_NodeToolCmd):
+    options = []
     usage = "usage: ccm node_name flush [options]"
     nodetool_cmd = 'flush'
     descr_text = "Flush node name"
 
 
 class NodeCompactCmd(_NodeToolCmd):
+    options = []
     usage = "usage: ccm node_name compact [options]"
     nodetool_cmd = 'compact'
     descr_text = "Compact node name"
 
 
 class NodeDrainCmd(_NodeToolCmd):
+    options = []
     usage = "usage: ccm node_name drain [options]"
     nodetool_cmd = 'drain'
     descr_text = "Drain node name"
 
 
 class NodeCleanupCmd(_NodeToolCmd):
+    options = []
     usage = "usage: ccm node_name cleanup [options]"
     nodetool_cmd = 'cleanup'
     descr_text = "Run cleanup on node name"
 
 
 class NodeRepairCmd(_NodeToolCmd):
+    options = []
     usage = "usage: ccm node_name repair [options]"
     nodetool_cmd = 'repair'
     descr_text = "Run repair on node name"
 
 
 class NodeVersionCmd(_NodeToolCmd):
+    options = []
     usage = "usage: ccm node_name version"
     nodetool_cmd = 'version'
     descr_text = "Get the cassandra version of node"
 
 
 class NodeDecommissionCmd(_NodeToolCmd):
+    options = [
+        (['--force'], {'action': "store_true", 'dest': "force", 'help': "Force decommission of this node even when it reduces the number of replicas to below configured RF.  Note: This is only relevant for C* 3.12+.", 'default': False}),
+    ]
     usage = "usage: ccm node_name decommission [options]"
     nodetool_cmd = 'decommission'
     descr_text = "Run decommission on node name"
@@ -347,7 +389,7 @@ class NodeDecommissionCmd(_NodeToolCmd):
     def get_parser(self):
         parser = self._get_default_parser(self.usage, self.description())
         parser.add_option('--force', action="store_true", dest="force",
-                help="Force decommission of this node even when it reduces the number of replicas to below configured RF.  Note: This is only relevant for C* 3.12+.", default=False)
+                          help="Force decommission of this node even when it reduces the number of replicas to below configured RF.  Note: This is only relevant for C* 3.12+.", default=False)
         return parser
 
     def run(self):
@@ -376,6 +418,7 @@ class _DseToolCmd(Cmd):
 
 
 class NodeDsetoolCmd(_DseToolCmd):
+    options = []
     usage = "usage: ccm node_name dsetool [options]"
     descr_text = "Run dsetool (connecting to node name)"
 
@@ -386,6 +429,10 @@ class NodeDsetoolCmd(_DseToolCmd):
 
 
 class NodeCliCmd(Cmd):
+    options = [
+        (['-x', '--exec'], {'dest': "cmds", 'default': None, 'help': "Execute the specified commands and exit"}),
+        (['-v', '--verbose'], {'action': "store_true", 'dest': "verbose", 'help': "With --exec, show cli output after completion", 'default': False}),
+    ]
 
     def description(self):
         return "Launch a cassandra cli connected to this node"
@@ -413,6 +460,10 @@ class NodeCliCmd(Cmd):
 
 
 class NodeCqlshCmd(Cmd):
+    options = [
+        (['-x', '--exec'], {'dest': "cmds", 'default': None, 'help': "Execute the specified commands and exit"}),
+        (['-v', '--verbose'], {'action': "store_true", 'dest': "verbose", 'help': "With --exec, show cli output after completion", 'default': False}),
+    ]
 
     def description(self):
         return "Launch a cqlsh session connected to this node"
@@ -435,6 +486,7 @@ class NodeCqlshCmd(Cmd):
 
 
 class NodeBulkloadCmd(Cmd):
+    options = []
 
     def description(self):
         return "Bulkload files into the cluster by connecting to this node"
@@ -453,6 +505,7 @@ class NodeBulkloadCmd(Cmd):
 
 
 class NodeScrubCmd(Cmd):
+    options = []
 
     def description(self):
         return "Scrub files"
@@ -471,6 +524,7 @@ class NodeScrubCmd(Cmd):
 
 
 class NodeVerifyCmd(Cmd):
+    options = []
 
     def description(self):
         return "Verify files"
@@ -489,6 +543,12 @@ class NodeVerifyCmd(Cmd):
 
 
 class NodeJsonCmd(Cmd):
+    options = [
+        (['-k', '--keyspace'], {'dest': "keyspace", 'default': None, 'help': "The keyspace to use [use all keyspaces by default]"}),
+        (['-c', '--column-families'], {'dest': "cfs", 'default': None, 'help': "Comma separated list of column families to use (requires -k to be set)"}),
+        (['--key'], {'action': "append", 'dest': "keys", 'default': None, 'help': "The key to include (you may specify multiple --key)"}),
+        (['-e', '--enumerate-keys'], {'action': "store_true", 'dest': "enumerate_keys", 'help': "Only enumerate keys (i.e, call sstable2keys)", 'default': False}),
+    ]
 
     def description(self):
         return "Call sstable2json/sstabledump on the sstables of this node"
@@ -538,6 +598,12 @@ class NodeJsonCmd(Cmd):
 
 
 class NodeSstablesplitCmd(Cmd):
+    options = [
+        (['-k', '--keyspace'], {'dest': "keyspace", 'default': None, 'help': "The keyspace to use [use all keyspaces by default]"}),
+        (['-c', '--column-families'], {'dest': 'cfs', 'default': None, 'help': "Comma separated list of column families to use (requires -k to be set)"}),
+        (['-s', '--size'], {'type': int, 'dest': "size", 'default': None, 'help': "Maximum size in MB for the output sstables (default: 50 MB)"}),
+        (['--no-snapshot'], {'action': 'store_true', 'dest': "no_snapshot", 'default': False, 'help': "Don't snapshot the sstables before splitting"}),
+    ]
 
     def description(self):
         return "Run sstablesplit on the sstables of this node"
@@ -581,6 +647,10 @@ class NodeSstablesplitCmd(Cmd):
 
 
 class NodeGetsstablesCmd(Cmd):
+    options = [
+        (['-k', '--keyspace'], {'dest': "keyspace", 'default': None, 'help': "The keyspace to use [use all keyspaces by default]"}),
+        (['-t', '--tables'], {'dest': 'tables', 'default': None, 'help': "Comma separated list of tables to use (requires -k to be set)"}),
+    ]
 
     def description(self):
         return "Run getsstables to get absolute path of sstables in this node"
@@ -618,6 +688,13 @@ class NodeGetsstablesCmd(Cmd):
 
 
 class NodeUpdateconfCmd(Cmd):
+    options = [
+        (['--no-hh', '--no-hinted-handoff'], {'action': "store_false", 'dest': "hinted_handoff", 'default': True, 'help': "Disable hinted handoff"}),
+        (['--batch-cl', '--batch-commit-log'], {'action': "store_true", 'dest': "cl_batch", 'default': None, 'help': "Set commit log to batch mode"}),
+        (['--periodic-cl', '--periodic-commit-log'], {'action': "store_true", 'dest': "cl_periodic", 'default': None, 'help': "Set commit log to periodic mode"}),
+        (['--rt', '--rpc-timeout'], {'action': "store", 'type': int, 'dest': "rpc_timeout", 'help': "Set rpc timeout"}),
+        (['-y', '--yaml'], {'action': "store_true", 'dest': "literal_yaml", 'default': False, 'help': "Pass in literal yaml string. Option syntax looks like ccm node_name updateconf -y 'a: [b: [c,d]]'"}),
+    ]
 
     def description(self):
         return "Update the cassandra config files for this node (useful when updating cassandra)"
@@ -669,6 +746,9 @@ class NodeUpdateconfCmd(Cmd):
 
 
 class NodeUpdatedseconfCmd(Cmd):
+    options = [
+        (['-y', '--yaml'], {'action': "store_true", 'dest': "literal_yaml", 'default': False, 'help': "Pass in literal yaml string. Option syntax looks like ccm node_name updatedseconf -y 'a: [b: [c,d]]'"}),
+    ]
 
     def description(self):
         return "Update the dse config files for this node"
@@ -699,6 +779,9 @@ class NodeUpdatedseconfCmd(Cmd):
 
 
 class NodeUpdatelog4jCmd(Cmd):
+    options = [
+        (['-p', '--path'], {'dest': "log4jpath", 'help': "Path to new Cassandra log4j configuration file"}),
+    ]
 
     def description(self):
         return "Update the Cassandra log4j-server.properties configuration file under given node"
@@ -732,6 +815,7 @@ class NodeUpdatelog4jCmd(Cmd):
 
 
 class NodeStressCmd(Cmd):
+    options = []
 
     def description(self):
         return "Run stress on a node"
@@ -753,6 +837,7 @@ class NodeStressCmd(Cmd):
 
 
 class NodeShuffleCmd(Cmd):
+    options = []
 
     def description(self):
         return "Run shuffle on a node"
@@ -771,6 +856,10 @@ class NodeShuffleCmd(Cmd):
 
 
 class NodeSetdirCmd(Cmd):
+    options = [
+        (['-v', "--version"], {'dest': "version", 'help': "Download and use provided cassandra or dse version. If version is of the form 'git:<branch name>', then the specified branch will be downloaded from the git repo and compiled. (takes precedence over --install-dir)", 'default': None}),
+        (["--install-dir"], {'dest': "install_dir", 'help': "Path to the cassandra or dse directory to use [default %%default]", 'default': "./"}),
+    ]
 
     def description(self):
         return "Set the cassandra directory to use for the node"
@@ -796,6 +885,7 @@ class NodeSetdirCmd(Cmd):
 
 
 class NodeSetworkloadCmd(Cmd):
+    options = []
 
     def description(self):
         return "Sets the workloads for a DSE node"
@@ -823,6 +913,7 @@ class NodeSetworkloadCmd(Cmd):
 
 
 class NodeDseCmd(Cmd):
+    options = []
 
     def description(self):
         return "Launch a dse client application connected to this node"
@@ -841,6 +932,7 @@ class NodeDseCmd(Cmd):
 
 
 class NodeHadoopCmd(Cmd):
+    options = []
 
     def description(self):
         return "Launch a hadoop session connected to this node"
@@ -859,6 +951,7 @@ class NodeHadoopCmd(Cmd):
 
 
 class NodeHiveCmd(Cmd):
+    options = []
 
     def description(self):
         return "Launch a hive session connected to this node"
@@ -877,6 +970,7 @@ class NodeHiveCmd(Cmd):
 
 
 class NodePigCmd(Cmd):
+    options = []
 
     def description(self):
         return "Launch a pig session connected to this node"
@@ -895,6 +989,7 @@ class NodePigCmd(Cmd):
 
 
 class NodeSqoopCmd(Cmd):
+    options = []
 
     def description(self):
         return "Launch a sqoop session connected to this node"
@@ -913,6 +1008,7 @@ class NodeSqoopCmd(Cmd):
 
 
 class NodeSparkCmd(Cmd):
+    options = []
 
     def description(self):
         return "Launch a spark session connected to this node"
@@ -931,6 +1027,7 @@ class NodeSparkCmd(Cmd):
 
 
 class NodePauseCmd(Cmd):
+    options = []
 
     def description(self):
         return "Send a SIGSTOP to this node"
@@ -948,6 +1045,7 @@ class NodePauseCmd(Cmd):
 
 
 class NodeResumeCmd(Cmd):
+    options = []
 
     def description(self):
         return "Send a SIGCONT to this node"
@@ -965,6 +1063,7 @@ class NodeResumeCmd(Cmd):
 
 
 class NodeJconsoleCmd(Cmd):
+    options = []
 
     def description(self):
         return "Opens jconsole client and connect to running node"
@@ -986,6 +1085,7 @@ class NodeJconsoleCmd(Cmd):
 
 
 class NodeVersionfrombuildCmd(Cmd):
+    options = []
 
     def description(self):
         return "Print the node's version as grepped from build.xml. Can be used when the node isn't running."
@@ -1003,6 +1103,7 @@ class NodeVersionfrombuildCmd(Cmd):
 
 
 class NodeBytemanCmd(Cmd):
+    options = []
 
     def description(self):
         return "Invoke byteman-submit "
